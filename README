@@ -39,7 +39,9 @@ INSTALLATION
 ICECAST2 CONFIGURATION
 ==============================
 This is mostly left as an exercise for you, but the following mount
-configuration works for me.
+authorization configuration works for me. It is up to you to configure the
+mount to actually play some audio (but see the "intro" config option for a 
+quick test).
 
 <mount>
  <mount-name>/mount_name</mount-name>
