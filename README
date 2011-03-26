@@ -1,0 +1,31 @@
+A Django app which will allow you to restrict listeners to an icecast2 stream.
+
+You grant access to a mount point by adding an Authorization model instance.
+You specify the mount point, a user name, a password, and a start and end time
+for the authorization.  When a user connects to a mount point which is
+configured to use URL authentication with the sample below, the icecast2 
+server will check the user's credentials against the username and password
+while also verifying that the current time is within the specified
+authorization timeframe.  Additionally, if the user is granted access, the 
+Django view will set the timelimit header to the end of the authorization
+window for that user.
+
+Note: this stuff only works if the icecast client in use supports
+authorization.  VLC does.
+
+<mount>
+    <mount-name>/mount_name</mount-name>
+    <authentication type="url">
+        <option name="listener_add" value="http://your-django.tld/icecast/listener/add/"/>
+        <option name="listener_remove" value="http://your-django.tld/icecast/listener/remove/"/>
+        <option name="auth_header" value="icecast-auth-user: 1"/>
+        <option name="timelimit_header" value="icecast-auth-timelimit:"/>
+    </authentication>
+</mount>
+
+INSTALLATION
+==============================
+1. Download the django_icecast_auth app and place it on your python path.
+2. Add 'django_icecast_auth' to your INSTALLED_APPS.
+3. Add the following line to your root URL conf:
+    (r'^icecast/', include('django_icecast_auth.urls')),
