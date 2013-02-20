@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import timedelta
 
 import requests
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+import django.utils.timezone
 
-from models import Authorization
+from models import Authorization, Mount, Listener
 
 
 class CongregateAuthFailure(Exception): pass
@@ -29,7 +31,8 @@ def listener_add(request):
     password = request.POST[u'pass']
 
     try:
-        now = datetime.now()
+        now = django.utils.timezone.now()
+        print now
         auth = Authorization.objects.get(
             mount__name=request.POST[u'mount'],
             user=username,
@@ -75,10 +78,7 @@ def listener_remove(request):
         u'port': [u'8888'],
     }>
     """
-    from django.shortcuts import get_object_or_404
-    from models import Mount, Listener
-    from datetime import datetime, timedelta
-    end = datetime.now()
+    end = django.utils.timezone.now()
     start = end - timedelta(seconds=int(request.POST[u'duration']))
 
     mount = get_object_or_404(Mount, name=request.POST[u'mount'])
