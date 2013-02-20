@@ -12,7 +12,13 @@ class AuthorizationAdmin(admin.ModelAdmin):
 admin.site.register(Authorization, AuthorizationAdmin)
 
 class ListenerAdmin(admin.ModelAdmin):
-    list_display = ('mount', 'user', 'password', 'start', 'end',)
-    list_filter = ('mount',)
+    list_display = ('mount', 'user', 'start', 'end',)
+    list_filter = ('mount', 'user')
     search_fields = ('user',)
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = []   
+        if not request.user.is_superuser:
+            self.exclude.append('password')
+        return super(ListenerAdmin, self).get_form(request, obj, **kwargs)
 admin.site.register(Listener, ListenerAdmin)
