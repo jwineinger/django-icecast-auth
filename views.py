@@ -1,5 +1,13 @@
+from datetime import datetime
+
+import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+
+from models import Authorization
+
+
+class CongregateAuthFailure(Exception): pass
 
 @csrf_exempt
 def listener_add(request):
@@ -16,31 +24,40 @@ def listener_add(request):
         u'port': [u'8888'],
     }>
     """
-    from datetime import datetime
-    from models import Authorization
-
     r = HttpResponse()
+    username = request.POST[u'user']
+    password = request.POST[u'pass']
+
     try:
         now = datetime.now()
         auth = Authorization.objects.get(
             mount__name=request.POST[u'mount'],
-            user=request.POST[u'user'],
-            password=request.POST[u'pass'],
+            user=username,
+            password=password,
             start__lte=now,
             end__gt=now,
         )
         r['icecast-auth-user'] = 1
-
-        duration = (auth.end - now).seconds
-        r['icecast-auth-timelimit'] = duration
-
-        msg = '''%s authorized on %s for %d seconds''' % (
-            auth.user, auth.mount, duration
-        )
-        r['icecast-auth-message'] = msg
+        r['icecast-auth-message'] = '%s authorized' % request.POST[u'user']
 
     except Authorization.DoesNotExist:
-        r['icecast-auth-message'] = "User not authorized"
+        try:
+            data = {
+                'username': username,
+                'password': password,
+            }
+
+            resp = requests.post('https://nwcocmn.congregateclients.com/members/login', data, verify=False, allow_redirects=False)
+
+            # success will issue a 302 redirect to the members home page
+            if resp.status_code != 302:
+                raise CongregateAuthFailure
+
+            r['icecast-auth-user'] = 1
+            r['icecast-auth-message'] = '%s authorized' % username
+
+        except CongregateAuthFailure:
+            r['icecast-auth-message'] = "User not authorized"
 
     return r
 
