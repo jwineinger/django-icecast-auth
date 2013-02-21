@@ -32,7 +32,6 @@ def listener_add(request):
 
     try:
         now = django.utils.timezone.now()
-        print now
         auth = Authorization.objects.get(
             mount__name=request.POST[u'mount'],
             user=username,
@@ -42,6 +41,7 @@ def listener_add(request):
         )
         r['icecast-auth-user'] = 1
         r['icecast-auth-message'] = '%s authorized' % request.POST[u'user']
+        r['icecast-auth-timelimit'] = int((auth.end - now).total_seconds())
 
     except Authorization.DoesNotExist:
         try:
