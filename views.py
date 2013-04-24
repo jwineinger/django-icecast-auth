@@ -76,7 +76,7 @@ def redirect_with_token(request, username, mount):
     url = "http://%s:%s@%s%s" % (
         username,
         token.token,
-        settings.STREAM_HOST,
+        request.get_host(),
         mount
     )
     return HttpResponseRedirect(url)
