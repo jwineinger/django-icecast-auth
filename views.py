@@ -65,6 +65,7 @@ def basicauth_required(view):
     return wrap
 
 
+
 @basicauth_required
 def redirect_with_token(request, username, mount):
     token = AuthToken(
@@ -73,7 +74,7 @@ def redirect_with_token(request, username, mount):
     )
     token.save()
 
-    url = "http://%s:%s@%s%s" % (
+    url = "http://%s:%s@%s/stream%s" % (
         username,
         token.token,
         request.get_host(),
@@ -144,3 +145,4 @@ def listener_remove(request):
         duration=int(request.POST[u'duration'])
     )
     return HttpResponse()
+
